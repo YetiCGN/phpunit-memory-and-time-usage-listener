@@ -5,8 +5,12 @@ namespace PhpunitMemoryAndTimeUsageListener\Listener\Measurement;
 use PhpunitMemoryAndTimeUsageListener\Domain\Measurement\MemoryMeasurement;
 use PhpunitMemoryAndTimeUsageListener\Domain\Measurement\TestMeasurement;
 use PhpunitMemoryAndTimeUsageListener\Domain\Measurement\TimeMeasurement;
+use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestListener;
+use PHPUnit\Framework\Warning;
 
-class TimeAndMemoryTestListener implements \PHPUnit_Framework_TestListener
+class TimeAndMemoryTestListener implements TestListener
 {
     /** @var int  */
     protected $testSuitesRunning = 0;
@@ -42,25 +46,25 @@ class TimeAndMemoryTestListener implements \PHPUnit_Framework_TestListener
     protected $memoryUsage;
     protected $memoryPeakIncrease;
 
-    public function __construct($configurationOptions = array())
+    public function __construct($configurationOptions = [])
     {
         $this->setConfigurationOptions($configurationOptions);
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
+     * @param Test $test
      */
-    public function startTest(\PHPUnit_Framework_Test $test)
+    public function startTest(Test $test): void
     {
         $this->memoryUsage = memory_get_usage();
         $this->memoryPeakIncrease = memory_get_peak_usage();
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
+     * @param Test $test
      * @param $time
      */
-    public function endTest(\PHPUnit_Framework_Test $test, $time)
+    public function endTest(Test $test, $time): void
     {
         $this->executionTime = new TimeMeasurement($time);
         $this->memoryUsage = memory_get_usage() - ($this->memoryUsage);
@@ -78,62 +82,71 @@ class TimeAndMemoryTestListener implements \PHPUnit_Framework_TestListener
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
-     * @param \Exception              $exception
-     * @param float                   $time
+     * @param Test $test
+     * @param \Throwable $throwable
+     * @param float      $time
      */
-    public function addError(\PHPUnit_Framework_Test $test, \Exception $exception, $time)
+    public function addError(Test $test, \Throwable $exception, float $time): void
     {
     }
 
     /**
-     * @param \PHPUnit_Framework_Test                 $test
-     * @param \PHPUnit_Framework_AssertionFailedError $exception
+     * @param Test $test
+     * @param \Throwable $throwable
+     * @param float      $time
+     */
+    public function addWarning(Test $test, Warning $e, float $time): void
+    {
+    }
+
+    /**
+     * @param Test                 $test
+     * @param AssertionFailedError $exception
      * @param float                                   $time
      */
-    public function addFailure(\PHPUnit_Framework_Test $test, \PHPUnit_Framework_AssertionFailedError $exception, $time)
+    public function addFailure(Test $test, AssertionFailedError $exception, float $time): void
     {
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
-     * @param \Exception              $exception
+     * @param Test $test
+     * @param \Throwable $throwable
+     * @param float      $time
+     */
+    public function addIncompleteTest(Test $test, \Throwable $throwable, float $time): void
+    {
+    }
+
+    /**
+     * @param Test $test
+     * @param \Throwable              $throwable
      * @param float                   $time
      */
-    public function addIncompleteTest(\PHPUnit_Framework_Test $test, \Exception $exception, $time)
+    public function addRiskyTest(Test $test, \Throwable $throwable, float $time): void
     {
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
-     * @param \Exception              $exception
+     * @param Test $test
+     * @param \Throwable              $throwable
      * @param float                   $time
      */
-    public function addRiskyTest(\PHPUnit_Framework_Test $test, \Exception $exception, $time)
+    public function addSkippedTest(Test $test, \Throwable $throwable, float $time): void
     {
     }
 
     /**
-     * @param \PHPUnit_Framework_Test $test
-     * @param \Exception              $exception
-     * @param float                   $time
+     * @param TestSuite $suite
      */
-    public function addSkippedTest(\PHPUnit_Framework_Test $test, \Exception $exception, $time)
-    {
-    }
-
-    /**
-     * @param \PHPUnit_Framework_TestSuite $suite
-     */
-    public function startTestSuite(\PHPUnit_Framework_TestSuite $suite)
+    public function startTestSuite(TestSuite $suite): void
     {
         $this->testSuitesRunning++;
     }
 
     /**
-     * @param \PHPUnit_Framework_TestSuite $suite
+     * @param TestSuite $suite
      */
-    public function endTestSuite(\PHPUnit_Framework_TestSuite $suite)
+    public function endTestSuite(TestSuite $suite): void
     {
         $this->testSuitesRunning--;
 
